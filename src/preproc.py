@@ -4,6 +4,10 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import config as cfg
+import pickle
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 
 def _sort_by_date(year_data): 
     month_data = year_data.loc[year_data['month'] == 1]
@@ -273,6 +277,31 @@ def load_influenza_data(datapath):
     return influenza_data
 
 
+def _split_xy(data):
+    data = data.reset_index()
+    year = data["year"]
+    week = data["week"]
+    data = data.drop(["year","week"],axis=1)
+    cols = data.columns
+
+    X = data.drop(["index", "month", "day", "weekly_infections"], axis=1)
+
+    y = data["weekly_infections"].reset_index()
+    y.drop(["index"], axis=1, inplace=True)
+
+    return X, y 
+
+
+def _min_max_scaler(data):
+    cols = data.columns
+
+    scaler = MinMaxScaler()
+    data = scaler.fit_transform(data)
+    data = pd.DataFrame(data, columns=cols)
+
+    return data
+
+
 def load_data(datapath):
     weather = load_weather_data(datapath)
     weather = _interpolate_weather_data(weather)
@@ -282,8 +311,21 @@ def load_data(datapath):
     flu = load_influenza_data(datapath)
 
     data = _merge_data(weather, flu)
+    data_2018 = data.loc[data['year'] == 2018]
+    data = data.loc[data['year'] != 2018]
 
-    return data
+    X, y = _split_xy(data)
+    X_2018, y_2018 = _split_xy(data_2018)
+
+    # split train test
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=cfg.TEST_SIZE, random_state=cfg.RANDOM_SEED)
+
+    # scale dataset
+    X_train, y_train = _min_max_scaler(X_train), _min_max_scaler(y_train)
+    X_test, y_test = _min_max_scaler(X_test), _min_max_scaler(y_test)
+    X_2018, y_2018 = _min_max_scaler(X_2018), _min_max_scaler(y_2018)
+
+    return X_train, y_train, X_test, y_test, X_2018, y_2018
 
 
 def pair_plot(data, output_path):
@@ -312,9 +354,20 @@ def corr_plot(data, output_path):
     plt.clf()
 
 
+def save_dataset(X, y, datapath, suffix=''):
+    X_fp = os.path.join(datapath, '_'.join(['X', suffix]) + '.pkl')
+    y_fp = os.path.join(datapath, '_'.join(['y', suffix]) + '.pkl')
+
+    pickle.dump(X, open(X_fp, 'wb'))
+    pickle.dump(y, open(y_fp, 'wb'))
+
 if __name__ == '__main__':
     datapath = '../data'
 
-    d = load_data(datapath)
-    pair_plot(d, os.path.join(datapath, 'pair.png'))
-    corr_plot(d, os.path.join(datapath, 'corr.png'))
+    X_train, y_train, X_test, y_test, X_2018, y_2018 = load_data(datapath)
+    save_dataset(X_train, y_train, datapath, suffix='train')
+    save_dataset(X_test, y_test, datapath, suffix='test')
+    save_dataset(X_2018, y_2018, datapath, suffix='2018')
+
+    #pair_plot(d, os.path.join(datapath, 'pair.png'))
+    #corr_plot(d, os.path.join(datapath, 'corr.png'))
