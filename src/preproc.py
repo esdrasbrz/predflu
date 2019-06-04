@@ -292,14 +292,15 @@ def _split_xy(data):
     return X, y 
 
 
-def _min_max_scaler(data):
-    cols = data.columns
-
+def _scaler_fit(data):
     scaler = MinMaxScaler()
-    data = scaler.fit_transform(data)
-    data = pd.DataFrame(data, columns=cols)
+    return scaler.fit(data)
 
-    return data
+
+def _scaler_transform(scaler, data):
+    cols = data.columns
+    data = scaler.transform(data)
+    return pd.DataFrame(data, columns=cols)
 
 
 def load_data(datapath):
@@ -321,9 +322,11 @@ def load_data(datapath):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=cfg.TEST_SIZE, random_state=cfg.RANDOM_SEED)
 
     # scale dataset
-    X_train, y_train = _min_max_scaler(X_train), _min_max_scaler(y_train)
-    X_test, y_test = _min_max_scaler(X_test), _min_max_scaler(y_test)
-    X_2018, y_2018 = _min_max_scaler(X_2018), _min_max_scaler(y_2018)
+    scaler_x = _scaler_fit(X_train)
+    scaler_y = _scaler_fit(y_train)
+    X_train, y_train = _scaler_transform(scaler_x, X_train), _scaler_transform(scaler_y, y_train)
+    X_test, y_test = _scaler_transform(scaler_x, X_test), _scaler_transform(scaler_y, y_test)
+    X_2018, y_2018 = _scaler_transform(scaler_x, X_2018), _scaler_transform(scaler_y, y_2018)
 
     return X_train, y_train, X_test, y_test, X_2018, y_2018
 
