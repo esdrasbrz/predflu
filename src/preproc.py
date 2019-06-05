@@ -365,12 +365,12 @@ def save_dataset(X, y, datapath, suffix=''):
     pickle.dump(y, open(y_fp, 'wb'))
 
 if __name__ == '__main__':
-    datapath = '../data'
+    datapath = cfg.DATA_PATH
 
     X_train, y_train, X_test, y_test, X_2018, y_2018 = load_data(datapath)
-    save_dataset(X_train, y_train, datapath, suffix='train')
-    save_dataset(X_test, y_test, datapath, suffix='test')
-    save_dataset(X_2018, y_2018, datapath, suffix='2018')
+    save_dataset(X_train, y_train.values.flatten(), datapath, suffix='train')
+    save_dataset(X_test, y_test.values.flatten(), datapath, suffix='test')
+    save_dataset(X_2018, y_2018.values.flatten(), datapath, suffix='2018')
 
     #pair_plot(d, os.path.join(datapath, 'pair.png'))
     #corr_plot(d, os.path.join(datapath, 'corr.png'))

@@ -1,2 +1,4 @@
 RANDOM_SEED = 42
 TEST_SIZE = 0.4
+
+DATA_PATH = '../data'
