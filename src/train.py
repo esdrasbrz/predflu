@@ -1,6 +1,7 @@
 from model import AbstractModel
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.neural_network import MLPRegressor
 import matplotlib.pyplot as plt
 import pickle
 import config as cfg
@@ -20,6 +21,11 @@ MODELS = [
                                        max_features=8,
                                        min_samples_leaf=1,
                                        min_samples_split=12)
+    },
+    {
+        'name': 'MLP',
+        'model': MLPRegressor(hidden_layer_sizes=(256,128,64),
+                              activation='relu')
     }
 ]
 
