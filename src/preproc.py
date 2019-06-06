@@ -303,7 +303,30 @@ def _scaler_transform(scaler, data):
     return pd.DataFrame(data, columns=cols)
 
 
-def load_data(datapath):
+def load_trends_data(datapath):
+    years_to_load = ['2012','2013','2014','2015','2016','2017','2018']
+ 
+    trends = None
+    for year in years_to_load:
+        filename = os.path.join(datapath, 'trends-{}.csv'.format(year))
+        year_data = pd.read_csv(filename, skiprows=3, names=['date', 'trends'])
+        year_data = year_data.drop(['date'], axis=1).values
+
+        qty_weeks = year_data.shape[0]
+        year_data = np.append(np.array(list(range(qty_weeks))).reshape(qty_weeks, 1), year_data, axis=1)
+        year_data = np.append(np.array(qty_weeks * [int(year)]).reshape(qty_weeks, 1), year_data, axis=1)
+
+        year_df = pd.DataFrame(year_data, columns=['year', 'week', 'trends'])
+
+        if trends is None:
+            trends = year_df
+        else:
+            trends = pd.concat([trends, year_df])
+
+    trends.set_index('year', 'week')
+    return trends
+
+def load_data(datapath, load_trends=True):
     weather = load_weather_data(datapath)
     weather = _interpolate_weather_data(weather)
     weather = _handle_outliers(weather)
@@ -311,7 +334,13 @@ def load_data(datapath):
 
     flu = load_influenza_data(datapath)
 
+    trends = load_trends_data(datapath)
+
     data = _merge_data(weather, flu)
+
+    if load_trends:
+        data = pd.merge(data, trends, on=['year', 'week'])
+
     data_2018 = data.loc[data['year'] == 2018]
     data = data.loc[data['year'] != 2018]
 
@@ -322,6 +351,9 @@ def load_data(datapath):
     scaler_y = _scaler_fit(y)
     X, y = _scaler_transform(scaler_x, X), _scaler_transform(scaler_y, y)
     X_2018, y_2018 = _scaler_transform(scaler_x, X_2018), _scaler_transform(scaler_y, y_2018)
+
+    print(X.shape)
+    print(X_2018.shape)
     return X, y, X_2018, y_2018
 
 
