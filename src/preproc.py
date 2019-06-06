@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import config as cfg
 import pickle
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 def _sort_by_date(year_data): 
     month_data = year_data.loc[year_data['month'] == 1]
@@ -318,17 +318,11 @@ def load_data(datapath):
     X, y = _split_xy(data)
     X_2018, y_2018 = _split_xy(data_2018)
 
-    # split train test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=cfg.TEST_SIZE, random_state=cfg.RANDOM_SEED)
-
-    # scale dataset
-    scaler_x = _scaler_fit(X_train)
-    scaler_y = _scaler_fit(y_train)
-    X_train, y_train = _scaler_transform(scaler_x, X_train), _scaler_transform(scaler_y, y_train)
-    X_test, y_test = _scaler_transform(scaler_x, X_test), _scaler_transform(scaler_y, y_test)
+    scaler_x = _scaler_fit(X)
+    scaler_y = _scaler_fit(y)
+    X, y = _scaler_transform(scaler_x, X), _scaler_transform(scaler_y, y)
     X_2018, y_2018 = _scaler_transform(scaler_x, X_2018), _scaler_transform(scaler_y, y_2018)
-
-    return X_train, y_train, X_test, y_test, X_2018, y_2018
+    return X, y, X_2018, y_2018
 
 
 def pair_plot(data, output_path):
@@ -367,9 +361,8 @@ def save_dataset(X, y, datapath, suffix=''):
 if __name__ == '__main__':
     datapath = cfg.DATA_PATH
 
-    X_train, y_train, X_test, y_test, X_2018, y_2018 = load_data(datapath)
+    X_train, y_train, X_2018, y_2018 = load_data(datapath)
     save_dataset(X_train, y_train.values.flatten(), datapath, suffix='train')
-    save_dataset(X_test, y_test.values.flatten(), datapath, suffix='test')
     save_dataset(X_2018, y_2018.values.flatten(), datapath, suffix='2018')
 
     #pair_plot(d, os.path.join(datapath, 'pair.png'))

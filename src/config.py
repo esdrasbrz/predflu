@@ -1,4 +1,5 @@
 RANDOM_SEED = 42
-TEST_SIZE = 0.4
+TEST_SIZE = 0.0
+PLOT_REGRESSION = False
 
 DATA_PATH = '../data'
