@@ -326,7 +326,7 @@ def load_trends_data(datapath):
     trends.set_index('year', 'week')
     return trends
 
-def load_data(datapath, load_trends=True):
+def load_data(datapath, load_trends=cfg.USE_GOOGLE_TRENDS, plot=cfg.PLOT_DATA):
     weather = load_weather_data(datapath)
     weather = _interpolate_weather_data(weather)
     weather = _handle_outliers(weather)
@@ -340,6 +340,10 @@ def load_data(datapath, load_trends=True):
 
     if load_trends:
         data = pd.merge(data, trends, on=['year', 'week'])
+
+    if plot:
+        pair_plot(data, os.path.join(datapath, 'pair.png'))
+        corr_plot(data, os.path.join(datapath, 'corr.png'))
 
     data_2018 = data.loc[data['year'] == 2018]
     data = data.loc[data['year'] != 2018]
@@ -358,9 +362,6 @@ def load_data(datapath, load_trends=True):
 
 
 def pair_plot(data, output_path):
-    data = data[["temp_weeklyMin","temp_weeklyMax","temp_weeklyMean","temp_7h_weeklyMedian","hum_weeklyMean",\
-                        "hum_7h_weeklyMedian","precip_weeklyMean","wind_mSec_mean","weekly_infections"]].reset_index()
-
     plt.figure()
     plot = sns.pairplot(data)
     plot.savefig(output_path)
@@ -397,5 +398,4 @@ if __name__ == '__main__':
     save_dataset(X_train, y_train.values.flatten(), datapath, suffix='train')
     save_dataset(X_2018, y_2018.values.flatten(), datapath, suffix='2018')
 
-    #pair_plot(d, os.path.join(datapath, 'pair.png'))
-    #corr_plot(d, os.path.join(datapath, 'corr.png'))
+
