@@ -116,7 +116,7 @@ def symptoms(tokens, n_threads=cfg.N_THREADS):
     return _thread_filter(is_symptom, tokens, n_threads)
 
 
-def flu_symptoms(tokens, n_threads=cfg.N_THREADS):
+def flu_symptoms(tokens, n_threads=1):
     all_symptoms = all_flu_symptoms()
 
     return _thread_filter(lambda t: t in all_symptoms, tokens, n_threads)
