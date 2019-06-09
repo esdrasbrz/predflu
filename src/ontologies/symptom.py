@@ -43,7 +43,7 @@ def is_symptom(s):
 
 def all_flu_symptoms():
     query = """
-    SELECT ?label
+    SELECT DISTINCT ?label
     WHERE {
         ?symp rdfs:subClassOf obo:OGMS_0000020 .
         ?symp rdfs:label ?label
@@ -52,6 +52,20 @@ def all_flu_symptoms():
 
     query = _add_prefixes(query)
     res = flu_endpoint.execute_query(query)
+    labels = set([l['label']['value'] for l in res['results']['bindings']])
+    return labels
+
+
+def all_symptoms():
+    query = """
+    SELECT DISTINCT ?label
+    WHERE {
+        ?symp rdfs:label ?label
+    }
+    """
+
+    query = _add_prefixes(query)
+    res = symp_endpoint.execute_query(query)
     labels = set([l['label']['value'] for l in res['results']['bindings']])
     return labels
 
@@ -112,12 +126,14 @@ def _thread_filter(fn, tokens, n_threads):
     return res
 
 
-def symptoms(tokens, n_threads=cfg.N_THREADS):
-    return _thread_filter(is_symptom, tokens, n_threads)
+ALL_SYMPTOMS = all_symptoms()
+ALL_FLU_SYMPTOMS = all_flu_symptoms()
+
+
+def symptoms(tokens, n_threads=1):
+    return _thread_filter(lambda t: t in ALL_SYMPTOMS, tokens, n_threads)
 
 
 def flu_symptoms(tokens, n_threads=1):
-    all_symptoms = all_flu_symptoms()
-
-    return _thread_filter(lambda t: t in all_symptoms, tokens, n_threads)
+    return _thread_filter(lambda t: t in ALL_FLU_SYMPTOMS, tokens, n_threads)
 
