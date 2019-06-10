@@ -1,6 +1,6 @@
 library(tidyverse)
 library(rtweet)
-  
+
 token <- create_token(
   app = "rtweet_token",
   consumer_key = "",
@@ -48,4 +48,7 @@ tweets_2012 <- left_join(tweets_2012, self_2012)
 tweets <- rbind(tweets_2009, tweets_2012) %>% select(created_at, text, related, infection, self)
 
 tweets %>% write_csv("../twitter-data/tweets.csv")
+
+flu_2019 <- search_tweets(q = "flu lang:en", n = 10000)
+flu_2019 %>% select(created_at, text) %>% write_csv("../twitter-data/tweets_2019.csv")
 

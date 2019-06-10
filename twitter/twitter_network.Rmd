@@ -1,0 +1,101 @@
+---
+title: "twitter_network"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+library(tidytext)
+library(igraph)
+library(gganimate)
+library(tidygraph)
+library(ggraph)
+library(tm)
+
+flu <- read_csv("../twitter-data/tweets.csv")
+flu_2019 <- read_csv("../twitter-data/tweets_2019.csv")
+
+```
+
+```{r}
+
+flu$created_at <- flu$created_at %>% ymd_hms()
+
+ggplot(data = flu, mapping = aes(x = created_at, y = stat(count))) +
+  geom_density() + 
+  labs(
+    title = "",
+    x = "",
+    y = "Número de menções"
+  )
+
+```
+
+
+```{r, dpi = 600}
+
+layout_list <- list(
+  list(layout = 'star'),
+  list(layout = 'circle'),
+  list(layout = 'gem'),
+  list(layout = 'graphopt'),
+  list(layout = 'grid'),
+  list(layout = 'mds'),
+  list(layout = 'randomly'),
+  list(layout = 'fr'),
+  list(layout = 'kk'),
+  list(layout = 'nicely'),
+  list(layout = 'lgl'),
+  list(layout = 'drl'))
+
+
+bigrams <- flu %>% 
+  unnest_tokens(bigram, text, token = "ngrams", n = 2)
+
+stop_words <- tibble(word = stopwords())
+
+bigrams_filtered <- bigrams %>%
+  separate(bigram, c("word1", "word2"), sep = " ") %>% 
+    anti_join(stop_words, by = c("word1" = "word")) %>% 
+    anti_join(stop_words, by = c("word2" = "word"))
+
+# new bigram counts:
+bigram_counts <- bigrams_filtered %>%
+  count(word1, word2, sort = TRUE)
+
+graph <- bigram_counts  %>%
+  top_n(300) %>% 
+  as_tbl_graph()
+
+filtered_graph <- graph %>% 
+  mutate(community = group_walktrap()) %>% 
+  filter(community %in% 1:3) # Getting rid of tiny communities
+
+layouts <- filtered_graph %>% 
+  invoke_map('create_layout', layout_list, graph = .) %>% 
+  set_names(unlist(layout_list)) %>% 
+  bind_rows(.id = 'layout')
+
+dummy_layout <- create_layout(filtered_graph, 'nicely')
+
+attr(layouts, 'graph') <- attr(dummy_layout, 'graph')
+attr(layouts, 'circular') <- FALSE
+
+g <- ggraph(layouts) +
+  geom_node_point(aes(col = as.factor(community))) +
+  geom_node_text(aes(label = name), vjust = 1, hjust = 1, size = 3.5) +
+  theme_graph() +
+  theme(legend.position = 'none') +
+  labs(title = 'Word relationships',
+       subtitle = 'Using {closest_state} layout engine') +
+  transition_states(layout, 1, 2) +
+  ease_aes('linear') +
+  view_follow()
+
+animate(g, fps = 30, nframes = 1000)
+
+
+```
+
