@@ -6,3 +6,4 @@ PLOT_DATA = False
 
 PLOT_REGRESSION = True
 DATA_PATH = '../data'
+N_THREADS = 8
