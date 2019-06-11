@@ -4,6 +4,9 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+
+# Bibliotecas que serão usadas na analise
+
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(lubridate)
@@ -14,27 +17,32 @@ library(tidygraph)
 library(ggraph)
 library(tm)
 
+# Lê os dados
 flu <- read_csv("../twitter-data/tweets.csv")
 flu_2019 <- read_csv("../twitter-data/tweets_2019.csv")
 
-```
+# Set targets as NA
+flu_2019$related <- NA
+flu_2019$infection <- NA
+flu_2019$self <- NA
 
-```{r}
+# Agrupa dados da referencia com dados de 2019
+flu_all <- rbind(flu, flu_2019)
 
-flu$created_at <- flu$created_at %>% ymd_hms()
-
-ggplot(data = flu, mapping = aes(x = created_at, y = stat(count))) +
-  geom_density() + 
-  labs(
-    title = "",
-    x = "",
-    y = "Número de menções"
-  )
+# Pre processamento de texto
+flu_all %>% mutate(text = str_replace_all(text, "&quot;|&#x2F;", "'"),   
+           text = str_replace_all(text, "&#x2F;", "/"),           
+           text = str_replace_all(text, "<a(.*?)>", " "),         
+           text = str_replace_all(text, "&gt;|&lt;", " "),       
+           text = str_replace_all(text, "<[^>]*>", " "))  %>% 
+           filter(!str_detect(text, "^RT"))                       ## Remove retweets
 
 ```
 
 
 ```{r, dpi = 600}
+
+# Animação com os diferentes tipos de layout para encontrarmos o melhor.
 
 layout_list <- list(
   list(layout = 'star'),
@@ -51,7 +59,7 @@ layout_list <- list(
   list(layout = 'drl'))
 
 
-bigrams <- flu %>% 
+bigrams <- flu_all %>% 
   unnest_tokens(bigram, text, token = "ngrams", n = 2)
 
 stop_words <- tibble(word = stopwords())
@@ -66,11 +74,11 @@ bigram_counts <- bigrams_filtered %>%
   count(word1, word2, sort = TRUE)
 
 graph <- bigram_counts  %>%
-  top_n(300) %>% 
+  top_n(200) %>% 
   as_tbl_graph()
 
 filtered_graph <- graph %>% 
-  mutate(community = group_walktrap()) %>% 
+  mutate(community = group_walktrap(weights = n)) %>% 
   filter(community %in% 1:3) # Getting rid of tiny communities
 
 layouts <- filtered_graph %>% 
@@ -95,7 +103,55 @@ g <- ggraph(layouts) +
   view_follow()
 
 animate(g, fps = 30, nframes = 1000)
+  
+
+```
+```{r, dpi = 300}
+
+#Layout final
+
+filtered_graph %>%
+  ggraph(layout = "nicely") +
+  geom_node_point(aes(colour = as.factor(community))) +
+  geom_node_text(aes(label = name), vjust = 1, hjust = 1, size = 2) +
+  theme_graph(foreground = NA) +
+  labs(title = 'Word relationships') +
+theme(legend.position = 'none')
+
 
 
 ```
 
+```{r, dpi = 300}
+
+# Grafo sem nenhum tipo de filtro e pre processamento
+
+bigrams <- flu_all %>% 
+  unnest_tokens(bigram, text, token = "ngrams", n = 2)
+
+stop_words <- tibble(word = stopwords())
+
+bigrams_filtered <- bigrams %>%
+  separate(bigram, c("word1", "word2"), sep = " ") %>% 
+    anti_join(stop_words, by = c("word1" = "word")) %>% 
+    anti_join(stop_words, by = c("word2" = "word"))
+
+# new bigram counts:
+bigram_counts <- bigrams_filtered %>%
+  count(word1, word2, sort = TRUE)
+
+graph <- bigram_counts  %>%
+  top_n(200) %>% 
+  as_tbl_graph()
+
+graph %>%
+  ggraph(layout = "graphopt") +
+  geom_node_point() +
+  geom_edge_link() + 
+  geom_node_text(aes(label = name), vjust = 1, hjust = 1, size = 2) +
+  theme_graph(foreground = NA) +
+  labs(title = 'Word relationships') +
+  theme(legend.position = 'none')
+
+
+```
