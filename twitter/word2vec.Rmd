@@ -1,0 +1,82 @@
+```{r setup, warning=FALSE, message = FALSE, echo=FALSE}
+
+library(tidyverse) 
+library(janitor)
+library(text2vec)
+library(tm)
+library(stringr)
+
+
+custom_stop_words <- tibble(word = c(stopwords("en"), "rt", "blank", "http", "br", "www", "href", "img", "bit", "ly", "bit_ly")) 
+
+flu <- read_csv("../twitter-data/tweets.csv")
+flu_2019 <- read_csv("../twitter-data/tweets_2019.csv")
+
+# Set targets as NA
+flu_2019$related <- NA
+flu_2019$infection <- NA
+flu_2019$self <- NA
+
+
+flu_all <- rbind(flu, flu_2019)
+
+flu_all <- flu_all %>% mutate(text = str_replace_all(text, "&quot;|&#x2F;", "'"),    
+                             text = str_replace_all(text, "&#x2F;", "/"),           
+                             text = str_replace_all(text, "<a(.*?)>", " "),         
+                             text = str_replace_all(text, "&gt;|&lt;", " "),        
+                             text = str_replace_all(text, "<[^>]*>", " "))
+
+comments <- flu_all %>%
+  mutate(comment_id = row_number())
+
+text <- comments$text
+```
+
+```{r}
+
+set.seed(10)
+
+# define preprocessing function and tokenization function
+prep_fun = function(x) {
+  x %>% 
+    # make text lower case
+    str_to_lower %>% 
+    # remove non-alphanumeric symbols
+    str_replace_all("[^[:alpha:]]", " ") %>% 
+    # collapse multiple spaces
+    str_replace_all("\\s+", " ")
+}
+
+
+tok_fun = word_tokenizer
+
+it = itoken(text, 
+            preprocessor = prep_fun, 
+            tokenizer = tok_fun, 
+            progressbar = T)
+
+vectorizer <- it %>%
+  create_vocabulary(stopwords = custom_stop_words$word, ngram = c(1L, 2L)) %>% 
+  prune_vocabulary(term_count_min = 10, 
+                   doc_proportion_max = 0.6,
+                   doc_proportion_min = 0.01) %>% 
+  vocab_vectorizer()
+
+dtm = create_dtm(it, vectorizer, type = "dgTMatrix")
+
+lda_model <- LDA$new(n_topics = 3, doc_topic_prior = 0.1, topic_word_prior = 0.01)
+
+doc_topic_distr = lda_model$fit_transform(x = dtm, n_iter = 1000, 
+                                          convergence_tol = 0.001, n_check_convergence = 25, 
+                                          progressbar = T)
+
+
+barplot(doc_topic_distr[1, ], xlab = "topic", 
+        ylab = "proportion", ylim = c(0, 1), 
+        names.arg = 1:ncol(doc_topic_distr))
+
+lda_model$get_top_words(n = 10, lambda = 1)
+
+lda_model$get_top_words(n = 10, lambda = 0.3)
+
+```
