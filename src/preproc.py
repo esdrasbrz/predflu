@@ -368,9 +368,10 @@ def pair_plot(data, output_path):
     plt.clf()
 
 
-def corr_plot(data, output_path):
-    data = data.reset_index()
-    data.drop(['year',"week"],axis=1,inplace=True)
+def corr_plot(data, output_path, reset_index=True):
+    if reset_index:
+        data = data.reset_index()
+        data.drop(['year',"week"],axis=1,inplace=True)
 
     # calculate the correlation matrix
     corr = data.corr()
