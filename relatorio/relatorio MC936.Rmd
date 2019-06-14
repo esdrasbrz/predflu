@@ -1,8 +1,9 @@
 ---
 title: "Projeto final MC936"
-subtitle: "PredFlu - Influenza Epidemics"
 author: "Esdras R. Carmo     - 170656 \n Gabriel J. Gimenez     - 155449"
-output: pdf_document
+subtitle: PredFlu - Influenza Epidemics
+output:
+  pdf_document: default
 ---
 
 # 1. Objetivos
@@ -14,7 +15,7 @@ output: pdf_document
 
 ## Análise Estatistica  
 
-No campo da análise estatistica nosso trabalho teve por objetivo encontrar tópicos em mensagens sobre gripe, de maneira a identificar sintomas, falsos diagnósticos e adicionar dados que possam auxiliar em pesquisas sobre a gripe.
+No campo da análise estatistica nosso trabalho teve por objetivo encontrar tópicos em mensagens sobre gripe, de maneira a identificar sintomas, falsos diagnósticos e adicionar dados que possam auxiliar em pesquisas sobre a gripe.  
 
 # 2. Introdução
 
@@ -35,11 +36,34 @@ No campo da análise estatistica nosso trabalho teve por objetivo encontrar tóp
 ## Análise Estatistica
 
 Para a análise estatistica utilizamos os mesmos dados da segunda parte de análise de redes, o texto de mensagens do twitter com o termo "flu" em dois periodos, 2009 - 2012, obtidos a partir da referencia 6, e de 2019.  
-A partir desses dados fizemos seu pré-processamento textual
-```{r}
+A partir desses dados fizemos seu pré-processamento textual utilizando bibliotecas do software R.  
+
+```{r eval=FALSE}
+# Remove links e htmls
+
+flu_all <- flu_all %>% mutate(text = str_replace_all(text, "&quot;|&#x2F;", "'"),    
+                               text = str_replace_all(text, "&#x2F;", "/"),           
+                               text = str_replace_all(text, "<a(.*?)>", " "),         
+                               text = str_replace_all(text, "&gt;|&lt;", " "),        
+                               text = str_replace_all(text, "<[^>]*>", " "))
+
+prep_fun = function(x) {
+  x %>% 
+    # make text lower case
+    str_to_lower %>% 
+    # remove non-alphanumeric symbols
+    str_replace_all("[^[:alpha:]]", " ") %>% 
+    # collapse multiple spaces
+    str_replace_all("\\s+", " ")
+}
+
+
+tok_fun = word_tokenizer
 
 ```
 
+Então criamos um vocabulario onde filtramos todas as palavras que aparecem em mais de 60% dos textos, visto que em sua maioria seriam artigos e stopwords e todas as palavras que aparecem menos de 1% dos textos por serem especificas demais para podermos generalizar os tópicos.  
+A partir desse vocabulario nós utilizamos Latent Dirichlet Allocation (LDA) para encontrar as palavras que definem cada tópico e o tópico que cada tweet pertence.  
 
 # 4. Resultados e Discussão
 
