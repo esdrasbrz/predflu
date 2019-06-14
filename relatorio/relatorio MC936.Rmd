@@ -1,0 +1,56 @@
+---
+title: "Projeto final MC936"
+subtitle: "PredFlu - Influenza Epidemics"
+author: "Esdras R. Carmo     - 170656 \n Gabriel J. Gimenez     - 155449"
+output: pdf_document
+---
+
+# 1. Objetivos
+
+## Análise de redes
+
+  Em análise de redes tivemos dois experimentos, um com o objetivo de encontrar redes complexar envolvendo o movimento antivacinas nos Estados Unidos e encontrar os nós centrais dessas redes, o que tornaria possivel antender as motivações e argumentos utilizados e combater esse perigoso movimento.  
+  O outro objetivo foi encontrar clusteres utilizando análise de redes em dados textuais, o que depois poderia ser processado para termos melhores previsões dos casos de gripe.  
+
+## Análise Estatistica  
+
+No campo da análise estatistica nosso trabalho teve por objetivo encontrar tópicos em mensagens sobre gripe, de maneira a identificar sintomas, falsos diagnósticos e adicionar dados que possam auxiliar em pesquisas sobre a gripe.
+
+# 2. Introdução
+
+# 3. Metodologia
+
+## Machine Learning
+
+## Ontologias
+
+## Análise de redes
+
+  Para a primeira parte da análise de redes complexas nós buscamos mensagens que continham "vaccines" e "chemicals" e identificamos seus autores, em uma pré-seleção vemos que em geral os autores se identificam como antivacinas.  
+  Então utilizamos a API do twitter para encontrar quem essas pessoas seguem, e assim montamos um grafo com 50000 perfis e suas relações. Com esse grafo, via Gephi, calculamos a centralidade dos nós e identificamos os 10 principais perfis, que consideramos os principais influenciadores dessa rede.  
+  
+  Na segunda parte nós utilizamos o texto de mensagens do twitter com o termo "flu" em dois periodos, 2009 - 2012, obtidos a partir da referencia 6, e de 2019. A partir desses dados fizemos seu pré-processamento textual e montamos um grafo baseado nas palavras de cada tweet. Esse grafo teve por objetivo encontrar clusteres nas mensagens e auxiliar na identificação entre casos de gripe e consiencia sobre ela, de modo a termos dados melhores para fazer a previsão dos dados futuros de gripe.  
+  
+
+## Análise Estatistica
+
+Para a análise estatistica utilizamos os mesmos dados da segunda parte de análise de redes, o texto de mensagens do twitter com o termo "flu" em dois periodos, 2009 - 2012, obtidos a partir da referencia 6, e de 2019.  
+A partir desses dados fizemos seu pré-processamento textual
+```{r}
+
+```
+
+
+# 4. Resultados e Discussão
+
+## Machine Learning
+
+## Ontologias
+
+## Análise de redes
+
+## Análise Estatistica
+
+# 5. Conclusão
+
+# 6. Referencias

@@ -28,5 +28,5 @@ top_antivax <- read_csv("../twitter-data/antivax_gephi.csv") %>% top_n(n = 10, w
 
 top_antivax$user_id <- as.factor(top_antivax$Id)
 
-vax %>% select(user_id, screen_name) %>% distinct() %>% inner_join(top_antivax) %>% view()
+vax %>% distinct() %>% inner_join(top_antivax) %>% select(eigencentrality, screen_name) %>% distinct() %>%  view()
 

@@ -3,8 +3,8 @@ library(rtweet)
 
 token <- create_token(
   app = "rtweet_token",
-  consumer_key = "LOYhsIGrWWTnXoVuFBlfljFi4",
-  consumer_secret = "yw2aqgHOB6pmrAAbeEU74UF0eLkqpKpsutgDehkAbhyzeRqSc8")
+  consumer_key = "",
+  consumer_secret = "")
 
 
 vax <- search_tweets(q = "vaccines AND chemicals lang:en", n = 10000)
