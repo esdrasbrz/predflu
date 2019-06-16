@@ -14,6 +14,13 @@ de casos.
 
 ## Ontologias
 
+Para a análise de ontologias, o objetivo é determinar se um texto qualquer fala
+sobre influenza a partir de sintomas de doenças encontrados pelo texto.
+
+Para isso, será aplicado algumas técnicas de processamento de texto e realizado
+consultas em ontologias que ajude a categorizar os termos encontrados no 
+texto.
+
 # Metodologia
 
 ## Machine Learning
@@ -124,6 +131,48 @@ que chuta um valor aleatório para todas as medidas.
 
 ## Ontologias
 
+A análise de sintomas tomará como base duas ontologias:
+- **Symptom Ontology (SYMP)** [3]: Ontologia com diversos
+sintomas de diversas doenças categorizados;
+- **Influenza Ontology (FLU)** [4]: Ontologia com informações sobre influenza, como diferentes vírus,
+drogas e sintomas mais comuns.
+
+As consultas realizadas nessas ontologias procuravam
+encontrar sintomas com um termo específico, sendo
+esse termo obtido através do processamento de texto.
+
+### Processamento de Texto
+
+Para o processamento de texto foi utilizado a biblioteca **nltk** para Python.
+
+Dado um corpus qualquer, o primeiro passo é converter o texto em tokens, isto é, em uma lista de palavras removendo pontuação. Feito isso, será removido as **stop-words** identificados pela biblioteca.
+Por fim, será aplicado **bigram** nos tokens restantes e adicionados ao fim da lista. Dessa forma, teremos uma lista com os termos principais do texto e sequências de 2 termos unidos, por exemplo:
+
+```
+The word cough itself sounds like a cough
+
+['word', 'cough', 'sounds', 'like', 'cough', 'word cough', 'cough sounds', 'sounds like', 'like cough']
+```
+
+Com base nas consultas **SPARQL** será obtido dois subconjuntos dos tokens resultantes, onde $S$ é o
+conjunto de sintomas presentes no texto e $S_I$ é o conjunto de sintomas específicos de influenza presentes no texto.
+
+### Score de Similaridade
+
+Para calcular a similaridade entre conjuntos foi escolhido o coeficiente de Jaccard, também conhecido como IOU (Intersection Over Union), e é definido da seguinte forma:
+$$
+J(A, B) = \frac{|A \cap B|}{|A \cup B|}
+$$
+
+Utilizando dessa métrica, calculamos a similaridade entre os conjuntos $S$ e $S_I$ 
+e a similaridade entre os conjuntos $S_I$ e $U_I$, sendo $U_I$ o conjunto universo de todos os sintomas de influenza existentes na ontologia.
+
+- $J(S, S_I)$: Esse score representa o quanto os sintomas presentes no texto são relacionados com a gripe. Assim, se todos os sintomas existentes no texto 
+forem sintomas de gripe, o coeficiente será 1;
+- $J(S_I, U_I)$: Esse score mede o quanto os sintomas de gripe existentes no texto estão próximos do conjunto
+total de sintomas da ontologia **FLU**. Portanto, quanto mais
+sintomas de gripe existe no texto, maior será esse score.
+
 
 # Resultados e Discussão
 
@@ -196,8 +245,58 @@ em tempo real dos casos de gripe com maior exatidão.
 
 ## Ontologias
 
+### Exemplo de execução do modelo
+
+Dado um corpus $C =$ "I'm feeling sick with fever, cough,
+nasal congestion and abdominal pain"
+
+Após aplicação do pré-processamento de texto, temos
+os tokens:
+```python
+['feeling', 'sick', 'fever', 'cough', 'nasal', 'congestion', 'abdominal', 'pain', 'feeling sick', 'sick fever', 'fever cough', 'cough nasal', 'nasal congestion', 'congestion abdominal', 'abdominal pain']
+```
+
+Após realizar as queries nas ontologias, obtemos
+os dois conjuntos de sintomas:
+```python
+S = {'congestion', 'nasal congestion', 'abdominal pain', 'fever', 'pain', 'cough'}
+
+S_I = {'fever', 'nasal congestion', 'cough'}
+```
+
+Calculando os dois scores de similaridade, temos:
+$$
+J(S, S_I) = 0.5 \\
+J(S_I, U_I) = 0.375 \\
+$$
+
+### Execução do modelo no Twitter
+
+Foi aplicado o modelo proposto em alguns posts do 
+twitter de um dataset que agrega diversos tweets que 
+falam sobre gripe. Os resultados:
+
+|                                                                       Tweet                                                                      | $J(S, S_I)$ | $J(U, U_I)$ |
+|:------------------------------------------------------------------------------------------------------------------------------------------------:|-------------|-------------|
+| Tessa has the swine flu. Luckily not much worse than a **cough** and on/off **fever**.,Getting better!,Time feels weird. Been outta work 2 days. | 1.0         | 0.25        |
+|                  's whole family is freaking out thinking that I have the swine flu.,since when is a **headache** and a **fever** the swine flu? | 1.0         | 0.25        |
+|                                                             I hav a **headache** and a hard **cough** where u **cough** (not often) but wen u do | 1.0         | 0.25        |
+|                                                             @GraceyJones I've been hugging her most of the day!,Motrin's just reducing **fever** | 1.0         | 0.125       |
+
+
+### Aplicações
+
+Dentre as aplicações do modelo de ontologias proposto, destacamos:
+- Detecção de textos na internet que falam sobre influenza;
+- Pré-processamento em análise de redes sociais (ex.: Twitter), a fim de melhorar a busca por tweets reponsáveis por gripe;
+- Expansão do modelo proposto para outras doenças apenas aumentando as ontologias disponíveis.
+
 # Referências
 
 [1] https://www.kaggle.com/zikazika/predicting-sickness-with-weather-data
 
 [2] https://trends.google.com.br/trends/?geo=BR
+
+[3] http://symptomontologywiki.igs.umaryland.edu/mediawiki/index.php/Main_Page
+
+[4] http://influenzaontologywiki.igs.umaryland.edu/mediawiki/index.php/Main_Page
