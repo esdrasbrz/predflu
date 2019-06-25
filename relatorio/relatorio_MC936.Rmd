@@ -3,10 +3,11 @@ title: "Projeto final MC936"
 author: "Esdras R. Carmo     - 170656 \n Gabriel J. Gimenez     - 155449"
 subtitle: PredFlu - Influenza Epidemics
 output:
-  html_document:
-    df_print: paged
   pdf_document: default
 ---
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
 
 # 1. Objetivos  
 
@@ -210,7 +211,7 @@ sintomas de gripe existe no texto, maior será esse score.
 Para a análise estatistica utilizamos os mesmos dados da segunda parte de análise de redes, o texto de mensagens do twitter com o termo "flu" em dois periodos, 2009 - 2012, obtidos a partir da referencia 6, e de 2019.  
 A partir desses dados fizemos seu pré-processamento textual utilizando bibliotecas do software R.  
 
-```{r eval=FALSE}
+```
 # Remove links e htmls
 
 flu_all <- flu_all %>% mutate(text = str_replace_all(text, "&quot;|&#x2F;", "'"),    
@@ -245,8 +246,10 @@ A partir desse vocabulario nós utilizamos Latent Dirichlet Allocation (LDA) par
 
 Segue a distribuição dos dados de treino e teste:
 
-<img src="../images/pair.png" width="50%"/><img src="../images/corr.png" width="50%"/>
-
+```{r, echo=FALSE,out.width = '50%'}
+knitr::include_graphics("../images/pair.png")
+knitr::include_graphics("../images/corr.png")
+```
 Nela observamos uma grande correlação positiva entre as diferentes informações de
 temperatura, assim como uma alta correlação entre as informações de humidade.
 
@@ -259,15 +262,25 @@ determinação do número de casos de influenza.
 Para melhor visualizar essa relações, podemos aplicar PCA com 2 componentes e verificamos
 as mesmas correlações, demonstrando que dentre todos os dados climáticos temperatura e 
 humidade são os principais na determinação do número de casos:
-<img src="../images/pair_pca_2.png" width="50%"/><img src="../images/corr_pca_2.png" width="50%"/>
+
+```{r, echo=FALSE,out.width = '50%'}
+knitr::include_graphics("../images/pair_pca_2.png.png")
+knitr::include_graphics("../images/corr_pca_2.png.png")
+```
+
 
 Acrescentando os dados obtidos através do Google Trends, observamos uma alta 
 correlação positiva entre o número de pesquisas no Google com o número de infecções:
-<img src="../images/pair_trends_crop.png" width="50%"><img src="../images/corr_trends.png" width="50%">
+
+```{r, echo=FALSE,out.width = '50%'}
+knitr::include_graphics("../images/pair_trends_crop.png")
+knitr::include_graphics("../images/corr_trends.png")
+```
 
 ### Resultados
 
-Tabela com o coeficiente de determinação calculado no conjunto de teste
+Tabela com o coeficiente de determinação calculado no conjunto de teste  
+
 | Modelo                   | $R^2$    | $R^2$ c/ GT |
 |--------------------------|----------|-------------|
 |         Regressão Linear | 0.58     | 0.70        |
@@ -282,13 +295,20 @@ com a adição do Google Trends. Além disso, o modelo Random Forest também per
 sem o Google Trends, se mostrando assim o modelo mais estável a adição de novas componentes
 e tratando melhor o overfitting.
 
-Segue os gráficos noo conjunto de treino dos melhores modelos com dados climáticos e
+Segue os gráficos no conjunto de treino dos melhores modelos com dados climáticos e
 adicionado do Google Trends respectivamente:
 
-<img src="../images/mlp_pca6_train.png" width="50%"><img src="../images/rf_trends_train.png" width="50%">
+```{r, echo=FALSE,out.width = '50%'}
+knitr::include_graphics("../images/mlp_pca6_train.png")
+knitr::include_graphics("../images/rf_trends_train.png")
+```
 
-Segue os gráficos dos mesmos modelos para o conjunto de teste:
-<img src="../images/mlp_pca6.png" width="50%"><img src="../images/rf_trends.png" width="50%">
+Segue os gráficos dos mesmos modelos para o conjunto de teste:  
+
+```{r, echo=FALSE,out.width = '50%'}
+knitr::include_graphics("../images/mlp_pca6.png")
+knitr::include_graphics("../images/rf_trends.png")
+```
 
 Nota-se, pelos gráficos, que o modelo que utilizou o Google Trends se mostrou melhor
 na inferência em dados extremos, sendo assim mais apropriado para detectar surtos.
@@ -357,26 +377,37 @@ Dentre as aplicações do modelo de ontologias proposto, destacamos:
 ## Análise de redes
 
 Chegamos a um grande grafo com usuários do twitter ligados com quem eles seguem:
-![Rede antivacinas](../apresentação/graph_antivax.png)  
+<center>
+![Rede antivacinas](../images/graph_antivax.png)  
+<\center>  
 A partir disso analisamos a centralidade do grafo. Na análise das redes antivacinas americanas encontramos os 10 perfis mais centrais no grafo para estudar a fundo. Os perfis foram os seguintes:  
-![10 nós mais centrais do grafo baseado em usuários antivacinas](../apresentação/top_antivax.png)  
+![10 nós mais centrais do grafo baseado em usuários antivacinas](../images/top_antivax.png)  
 Verificamos grandes similaridades entre os utuários, com 6 deles sendo compostos por supostos grupos de médicos e cientistas que contestam à segurança das vacinas, autores de livros que associam a descoberta do autismo com campanhas de vacinação. Notamos que é muitas vezes são utilizados argumentos científicos, como pesquisas e dados, mesmo se tratando de um movimento anticiência. Um outlier desses usuários foi o Presidente dos EUA Donald Trump, que não possui postagens com conteúdo antivacinas, mas mesmo assim tem um alto grau de centralidade no grafo.  
 Acreditamos que é possivel estudar esses perfis e seus argumentos para a criação de campanhas de vacinação mais eficazes e que possam atingir os membros desse grupo.  
 
 Nossa segunda abordagem para a análise de redes teve como resultado o seguinte grafo:
-![Clusteres de palavras baseadas em tweets sobre gripe](../apresentação/graph_n.png)   
+<center>
+![Clusteres de palavras baseadas em tweets sobre gripe](../images/graph_n.png)   
+<\center>  
 Com isso podemos ver que há um cluster principal com as palavras relevantes sobre gripe e dois clusteres não-relacionados. Nossa pricipal hipótese era encontrar clusteres baseados nos anos que os tweets foram capturados ou em alguma das classificações baseadas na referência [6], mas apesar de não termos obtido isso podemos utilizar esse resultado para filtrar mensagens e chegar em um número de mensagens que se correlacione mais com o número real de casos de gripe, com esse número de mensagens podendo ser utilizado por pesquisadores para prever o número de casos de gripe em uma determinada região.  
 
 ## Análise Estatistica
 
 Após encontrados os tópicos via LDA chegamos em uma distribuição bastante desigual das mensagens:
-![Proporção dos tópicos encontrados](../apresentação/proportion.png)  
+![Proporção dos tópicos encontrados](../images/proportion.png)  
 Assim, concluimos que topic modeling não é uma boa abordagem para o problema em questão. Entretanto tivemos resultados interessantes, com os tópicos encontrados sendo altamente correlacionados com os clusteres encontrados na segunda parte da análise de redes, mesmo eles sendo calculados por métodos bastante diferentes.  
-![Tópicos encontrados](../apresentação/Topic.png)
-![Clusteres de palavras baseadas em tweets sobre gripe](../apresentação/graph_n.png)   
+
+```{r, echo=FALSE,out.width = '50%'}
+knitr::include_graphics("../images/Topic.png")
+knitr::include_graphics("../images/graph_n.png")
+```
 
 
 # 5. Conclusão
+
+No nosso trabalho foram verificadas maneiras de contribuir para a área da saúde via computação. Nós acreditamos que com mais dados nosso modelo de machine learning tende a ficar mais robusto e que nós podemos obter mais dados a partir da filtragem de posts de redes sociais, se aplicados filtros para entender melhor essas mensagens, como no caso da análise de redes e estatística.  
+Além disso, nossa abordagem de ontologias, que foi bem sucedida em encontrar sintomas de gripe, pode ser extendida para um grande número de doenças e assim podemos obter dados melhores para outras pesquisas e abordagens.  
+Por fim, nossa primeira abordagem na análise de redes teve sucesso em encontrar os principais influenciadores dos grupos antivacinas, a partir disso podemos definir abordagens para combater esse tipo de discurso.
 
 # 6. Referencias
 
