@@ -9,7 +9,13 @@ output:
 options(tinytex.verbose = TRUE)
 ```
 
-# 1. Objetivos  
+
+# 1. Introdução
+
+Nosso trabalho tem por objetivo pesquisar maneiras de auxiliar outras pesquisas sobre a gripe, seja trazendo novos dados, seja avaliando tipos de previsões que podemos realizar ou mesmo testando novas abordagens sobre a doença.  
+Nossa abordagem de machine learning testa meios de prever os casos de gripe usando dados climáticos, entretando os modelos implementados podem ser generalizados para outros tipos de dados, como o google trends, que foi implementado, como volumetria de tweets, que, em conjunto com outras tecnicas utilizadas para filtrar e selecionar esses dados, podem aumentar a precisão de nossas previsões. Além disso nossa abordagem de redes pode encontrar tanto usuários que prejudicam os esforços de vacinação como nos casos dos grupos antivacinas, como médicos e outros profissionais da saúde que podem levar informações confiáveis ao público geral.
+
+# 2. Objetivos  
 
 ## Machine Learning
 
@@ -40,11 +46,6 @@ texto.
 ## Análise Estatistica  
 
 No campo da análise estatistica nosso trabalho teve por objetivo encontrar tópicos em mensagens sobre gripe, de maneira a identificar sintomas, falsos diagnósticos e adicionar dados que possam auxiliar em pesquisas sobre a gripe.  
-
-# 2. Introdução
-
-Nosso trabalho tem por objetivo pesquisar maneiras de auxiliar outras pesquisas sobre a gripe, seja trazendo novos dados, seja avaliando tipos de previsões que podemos realizar ou mesmo testando novas abordagens sobre a doença.  
-Nossa abordagem de machine learning testa meios de prever os casos de gripe usando dados climáticos, entretando os modelos implementados podem ser generalizados para outros tipos de dados, como o google trends, que foi implementado, como volumetria de tweets, que, em conjunto com outras tecnicas utilizadas para filtrar e selecionar esses dados, podem aumentar a precisão de nossas previsões. Além disso nossa abordagem de redes pode encontrar tanto usuários que prejudicam os esforços de vacinação como nos casos dos grupos antivacinas, como médicos e outros profissionais da saúde que podem levar informações confiáveis ao público geral.
 
 # 3. Metodologia
 
@@ -377,18 +378,20 @@ Dentre as aplicações do modelo de ontologias proposto, destacamos:
 ## Análise de redes
 
 Chegamos a um grande grafo com usuários do twitter ligados com quem eles seguem:
-<center>
+
+
 ![Rede antivacinas](../images/graph_antivax.png)  
-<\center>  
 A partir disso analisamos a centralidade do grafo. Na análise das redes antivacinas americanas encontramos os 10 perfis mais centrais no grafo para estudar a fundo. Os perfis foram os seguintes:  
+
 ![10 nós mais centrais do grafo baseado em usuários antivacinas](../images/top_antivax.png)  
+
 Verificamos grandes similaridades entre os utuários, com 6 deles sendo compostos por supostos grupos de médicos e cientistas que contestam à segurança das vacinas, autores de livros que associam a descoberta do autismo com campanhas de vacinação. Notamos que é muitas vezes são utilizados argumentos científicos, como pesquisas e dados, mesmo se tratando de um movimento anticiência. Um outlier desses usuários foi o Presidente dos EUA Donald Trump, que não possui postagens com conteúdo antivacinas, mas mesmo assim tem um alto grau de centralidade no grafo.  
 Acreditamos que é possivel estudar esses perfis e seus argumentos para a criação de campanhas de vacinação mais eficazes e que possam atingir os membros desse grupo.  
 
 Nossa segunda abordagem para a análise de redes teve como resultado o seguinte grafo:
-<center>
+
 ![Clusteres de palavras baseadas em tweets sobre gripe](../images/graph_n.png)   
-<\center>  
+
 Com isso podemos ver que há um cluster principal com as palavras relevantes sobre gripe e dois clusteres não-relacionados. Nossa pricipal hipótese era encontrar clusteres baseados nos anos que os tweets foram capturados ou em alguma das classificações baseadas na referência [6], mas apesar de não termos obtido isso podemos utilizar esse resultado para filtrar mensagens e chegar em um número de mensagens que se correlacione mais com o número real de casos de gripe, com esse número de mensagens podendo ser utilizado por pesquisadores para prever o número de casos de gripe em uma determinada região.  
 
 ## Análise Estatistica
