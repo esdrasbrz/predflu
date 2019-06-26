@@ -139,10 +139,17 @@ com respectivamente 256, 128 e 64 neurônios.
 ### Avaliação
 
 A avaliação do modelo foi realizada utilizando o coeficiente $R^2$:
+
 $$
-SS_{res} = \sum_i (y_i - f_i)^2 \\
-SS_{tot} = \sum_i (y_i - \bar{y})^2 \\
-R^2 = 1 - \frac{SS_{res}}{SS_{tot}} \\
+SS_{res} = \sum_i (y_i - f_i)^2 \\  
+$$
+
+$$
+SS_{tot} = \sum_i (y_i - \bar{y})^2 \\  
+$$   
+
+$$   
+R^2 = 1 - \frac{SS_{res}}{SS_{tot}} \\  
 $$
 
 Onde $y_i$ é o valor esperado (número de infecções reais) para determinado dado,
@@ -349,8 +356,12 @@ S_I = {'fever', 'nasal congestion', 'cough'}
 ```
 
 Calculando os dois scores de similaridade, temos:
+
 $$
 J(S, S_I) = 0.5 \\
+$$  
+
+$$  
 J(S_I, U_I) = 0.375 \\
 $$
 
